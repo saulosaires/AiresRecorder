@@ -152,6 +152,9 @@ public class RecorderFragment extends Fragment implements View.OnClickListener{
 
 
         intHour=intMin=intSec=0;
+        totalBytes = 0;
+
+        updateSpaceLabel(totalBytes,freeSpace);
 
         updateName();
         updateCounter();

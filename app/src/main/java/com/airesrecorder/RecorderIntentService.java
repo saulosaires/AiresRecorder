@@ -7,24 +7,12 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
-import android.os.Messenger;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 
 public class RecorderIntentService extends IntentService {
@@ -121,9 +109,20 @@ public class RecorderIntentService extends IntentService {
 
                   byte[] buffer = new byte[bufferSize];
                   isplaying = true;
+                  nBytes=0;
+                  double gain =1.8;
+
                   while (isplaying) {
 
-                      nBytes+= audioRecord.read(buffer, 0, buffer.length);
+                      int numRead= audioRecord.read(buffer, 0, buffer.length);
+
+                      nBytes+=numRead;
+
+                      if (numRead > 0) {
+
+                          for (int i = 0; i < numRead; ++i)
+                              buffer[i] = (byte)Math.min((int)(buffer[i] * gain), (int)Short.MAX_VALUE);
+                      }
 
                       outputStream.write(buffer);
 
@@ -166,7 +165,7 @@ public class RecorderIntentService extends IntentService {
     private void handleActionStop() {
 
         isplaying = false;
-
+        nBytes=0;
         if (audioRecord != null) {
             audioRecord.stop();
             audioRecord.release();
@@ -196,7 +195,7 @@ public class RecorderIntentService extends IntentService {
 
         if (audioRecord == null) {
 
-            RECORDER_BPP = PreferenceUtil.getBPP();
+            RECORDER_BPP        = PreferenceUtil.getBPP();
             RECORDER_SAMPLERATE = PreferenceUtil.getSampleRate();
 
             bufferSize = AudioRecord.getMinBufferSize(RECORDER_SAMPLERATE, AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
@@ -210,8 +209,6 @@ public class RecorderIntentService extends IntentService {
         }
 
     }
-
-
 
     private void WriteWaveFileHeader(File track) {
 

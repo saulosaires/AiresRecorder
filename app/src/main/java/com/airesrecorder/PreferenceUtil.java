@@ -10,7 +10,7 @@ import java.io.File;
 public class PreferenceUtil {
 
     private static final byte RECORDER_BPP = 16;
-    private static final int RECORDER_SAMPLERATE = 44100;
+    private static final int RECORDER_SAMPLERATE = 8000;
 
     public static String getStorageDir(){
 
